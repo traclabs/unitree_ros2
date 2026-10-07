@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(unitree_ros2_example)
 
 # Default to C99
@@ -19,16 +19,6 @@ endif()
 include_directories(include include/common include/nlohmann)
 link_directories(src)
 
-set (
-  DEPENDENCY_LIST
-  unitree_go
-  unitree_hg
-  unitree_api
-  rclcpp
-  std_msgs
-  rosbag2_cpp
-)
-
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(unitree_go REQUIRED)
@@ -48,15 +38,24 @@ add_executable(read_wireless_controller src/read_wireless_controller.cpp)
 #add_executable(record_bag src/record_bag.cpp)
 add_executable(sport_mode_ctrl src/sport_mode_ctrl.cpp src/common/ros2_sport_client.cpp)
 
-ament_target_dependencies(low_level_ctrl ${DEPENDENCY_LIST})
-ament_target_dependencies(low_level_ctrl_hg ${DEPENDENCY_LIST})
-ament_target_dependencies(g1_low_level_example ${DEPENDENCY_LIST})
-ament_target_dependencies(read_low_state ${DEPENDENCY_LIST})
-ament_target_dependencies(read_low_state_hg ${DEPENDENCY_LIST})
-ament_target_dependencies(read_motion_state ${DEPENDENCY_LIST})
-ament_target_dependencies(read_wireless_controller ${DEPENDENCY_LIST})
-#ament_target_dependencies(record_bag ${DEPENDENCY_LIST})
-ament_target_dependencies(sport_mode_ctrl ${DEPENDENCY_LIST})
+foreach(target
+    low_level_ctrl
+    low_level_ctrl_hg
+    g1_low_level_example
+    read_low_state
+    read_low_state_hg
+    read_motion_state
+    read_wireless_controller
+    sport_mode_ctrl)
+  target_link_libraries(${target} PUBLIC
+    ${std_msgs_TARGETS}
+    ${unitree_api_TARGETS}
+    ${unitree_go_TARGETS}
+    ${unitree_hg_TARGETS}
+    rclcpp::rclcpp
+    rosbag2_cpp::rosbag2_cpp
+  )
+endforeach()
 
 
 install(TARGETS 
